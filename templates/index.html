@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>DASH</title>
+    <script type="application/javascript" src="/static/lib/jquery-3.2.1.min.js"></script>
+    <link rel="stylesheet" href="/static/css/index.css" />
+    <link rel="stylesheet" href="/static/lib/uikit.min.css" />
+    <script src="/static/lib/uikit.min.js"></script>
+    <script src="/static/lib/uikit-icons.min.js"></script>
+</head>
+<body>
+    <div class="uk-container uk-navbar-container dash_head">
+        <nav uk-navbar>
+            <div class="uk-navbar-left">DockerDash</div>
+            <div class="uk-navbar-right">
+                <ul class="uk-navbar-nav">
+                    <li><a href="#">Home</a></li>
+                    <li><a id="btn_up" href="#">新增服务</a></li>
+                </ul>
+            </div>
+        </nav>
+    </div>
+    <div  uk-grid>
+{#        <div class="uk-width-1-3"></div>#}
+        <div class="uk-width-1-1">
+            <button class="uk-button uk-button-default" id="btn_get">刷新</button>
+        </div>
+    </div>
+    <div class="uk-text-center" uk-grid>
+        <div id="result_area"  class="uk-width-1-3">
+            <table id="result_area_tab">
+            </table>
+        </div>
+        <div id="result_detail_area" >
+            <table id="result_detail_area_tab">
+            </table>
+        </div>
+
+    </div>
+
+</body>
+</html>
+<script>
+    function get_list() {
+        $.get('/api/docker_get_list',function (data) {
+            var data_json = JSON.parse(data)
+             $('#result_area_tab').append('<tr><th>ID</th><th>Name</th><th>映射端口</th><th>操作</th></tr>');
+            for (var sID in data_json ){
+                $('#result_area_tab').append('<tr><td><button class="btn_sid">'
+                    + sID
+                    + '</button></td><td>'
+                    + data_json[sID].name
+                    +'</td><td><a href=http://10.21.14.10:'+
+                    + data_json[sID].port
+                    +' target="_blank">'
+                    + data_json[sID].port
+                    + '</a></td><td><button class="btn_del" value='+ sID +' >删除</button></td></tr>')
+            }
+            $('.btn_sid').on('click',function () {
+                $('#result_detail_area_tab').empty();
+                $.get('/api/docker_get_info?sid='+this.innerHTML,function (data) {
+                    if (data != '0'){
+                        var data_json = JSON.parse(data)
+                        $('#result_detail_area_tab').prepend('<h1>容器总数：'+data_json.length+'</h1>');
+                        $('#result_detail_area_tab').append('<tr><th>IP</th><th>ID</th><th>所在节点</th></tr>');
+                        for (var sInfo in data_json) {
+                            $('#result_detail_area_tab').append('<tr><td>'
+                                + data_json[sInfo]['NetworksAttachments'][0]['Addresses']
+                                + '</td><td>'
+                                + data_json[sInfo]['Status']['ContainerStatus']['ContainerID']
+                                + '</td><td class="node_id">'
+                                + data_json[sInfo]['NodeID']
+                                + '</td></tr>')
+                        }
+                        $.get('/api/get_node_info',function (data) {
+                            var data_json = JSON.parse(data);
+                            var all_node_id = $('.node_id');
+                            for (var i=0 ; i < all_node_id.length;i++){
+                                all_node_id[i].innerHTML = data_json[all_node_id[i].innerHTML];
+                            }
+                        });
+                    }else{
+                        alert('Wrong!!');
+                    }
+                })
+            });
+            $('.btn_del').on('click',function () {
+                var ok = confirm('删除吗？');
+                if (ok) {
+                    $.get('/api/del_service?sid=' + this.value, function (data) {
+                        if (data == '1') {
+                            $('#btn_get').click();
+                        } else {
+                            alert('Wrong!');
+                        }
+                    });
+                }
+             });
+        });
+    }
+
+    $('#btn_up').on('click',function () {
+        location.href = '/add';
+    });
+
+    get_list();
+
+    $('#btn_get').on('click',function(){
+        $('#result_area_tab').empty();
+        $('#result_detail_area_tab').empty();
+        get_list();
+    });
+
+
+</script>

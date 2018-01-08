@@ -1,0 +1,11 @@
+.dash_head{
+    background: linear-gradient(to left, #28a5f5, #1e87f0) !important;
+}
+.uk-navbar-left{
+    color: white;
+    font-size: 25px;
+}
+
+.uk-navbar-right > ul > li > a {
+    color: white;
+}

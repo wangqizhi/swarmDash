@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>add</title>
+    <script type="application/javascript" src="/static/lib/jquery-3.2.1.min.js"></script>
+    <link rel="stylesheet" href="/static/lib/uikit.min.css" />
+    <script src="/static/lib/uikit.min.js"></script>
+    <script src="/static/lib/uikit-icons.min.js"></script>
+</head>
+<body>
+    <div class="uk-breadcrumb">
+        <li><a href="#" id="btn_home">首页</a></li>
+        <li><span href="#" id="btn_up">新增服务</span></li>
+    </div>
+    <div>
+        <h1>新增服务</h1>
+        <input id="sName" type="text" placeholder="服务名称">
+        <input id="cNum" type="text" placeholder="数量(1-40个)">
+        <input id="sPort" type="text" placeholder="端口">
+        <input id="pName" type="text" placeholder="项目名称">
+        <button id="btn_add">新增</button>
+    </div>
+</body>
+</html>
+<script>
+    $('#btn_home').on('click',function () {
+        location.href = '/';
+    });
+    $('#btn_add').on('click',function () {
+        if( $('#sPort').val() == ''){
+            var sPort = '80';
+        }else{
+            sPort = $('#sPort').val();
+        }
+        $.get('/api/add_service?sName='
+            +$('#sName').val()
+            +'&cNum='
+            +$('#cNum').val()
+            +'&sPort='
+            +$('#sPort').val()
+            +'&pName='
+            +$('#pName').val()
+            ,function (data) {
+            console.log(data);
+            if (data == '0') {
+                alert('Wrong!');
+            }else{
+                alert('OK!');
+            }
+        });
+    });
+</script>
